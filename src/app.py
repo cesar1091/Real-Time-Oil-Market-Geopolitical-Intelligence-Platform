@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request
+from flask import Flask, request, render_template
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static", template_folder="templates")
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def main():
-    return '''
-     <form action="/echo_user_input" method="POST">
-         <input name="user_input">
-         <input type="submit" value="Submit!">
-     </form>
-     '''
-
-@app.route("/echo_user_input", methods=["POST"])
-def echo_input():
-    input_text = request.form.get("user_input", "")
-    return "You entered: " + input_text
+    response_text = None
+    if request.method == "POST":
+        input_text = request.form.get("user_input", "").strip()
+        response_text = (
+            "You entered: " + input_text
+            if input_text
+            else "Please enter a query to get intelligence feedback."
+        )
+    return render_template("index.html", response_text=response_text)

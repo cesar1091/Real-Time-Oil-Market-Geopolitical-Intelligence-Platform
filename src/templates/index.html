@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Oil Market Intelligence</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+    <div class="page-shell">
+        <header class="hero">
+            <div class="hero-content">
+                <span class="eyebrow">Real-time geopolitical insights</span>
+                <h1>Oil Market Intelligence Dashboard</h1>
+                <p class="hero-copy">
+                    Ask a question about supply, demand, geopolitics, or market drivers and get a concise summary instantly.
+                </p>
+                <form class="query-form" action="/" method="POST">
+                    <label for="user_input">Enter a query or scenario</label>
+                    <input id="user_input" name="user_input" type="text" placeholder="E.g. impact of OPEC output cuts on Brent prices" value="{{ request.form.get('user_input', '') }}" />
+                    <button type="submit">Submit</button>
+                </form>
+                {% if response_text %}
+                <section class="result-card">
+                    <h2>Analysis Result</h2>
+                    <p>{{ response_text }}</p>
+                </section>
+                {% endif %}
+            </div>
+        </header>
+
+        <main class="features">
+            <article>
+                <h2>Why this matters</h2>
+                <p>
+                    A smart webpage should help you capture market context quickly, present results clearly, and stay readable on desktop or mobile.
+                </p>
+            </article>
+            <article>
+                <h2>Improved layout</h2>
+                <ul>
+                    <li>Large hero section with a clear value proposition</li>
+                    <li>Accessible form labels and button styling</li>
+                    <li>Feedback card that highlights user submissions</li>
+                </ul>
+            </article>
+            <article>
+                <h2>Ready for next steps</h2>
+                <p>
+                    When you want, I can also add chart tiles, news feeds, or a live oil-price widget to make the page interactive.
+                </p>
+            </article>
+        </main>
+    </div>
+</body>
+</html>
