@@ -29,11 +29,11 @@ jobs:
 
       - name: Run news scraper
         run: |
-          python -m scraping.news_scraper
+          python -m scrapping.news_scraper
 
       - name: Run oil price scraper
         run: |
-          python -m scraping.oil_prices_scraper
+          python -m scrapping.oil_prices_scraper
 
       - name: Commit updated data
         run: |
