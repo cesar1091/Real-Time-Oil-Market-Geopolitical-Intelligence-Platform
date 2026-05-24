@@ -84,5 +84,5 @@ def sentiment_report(start_date, end_date):
         'positive': sum(1 for entry in filtered_data if entry['sentiment'] == 'POSITIVE'),
         'negative': sum(1 for entry in filtered_data if entry['sentiment'] == 'NEGATIVE'),
         'neutral': sum(1 for entry in filtered_data if entry['sentiment'] == 'NEUTRAL')
-    }.sort(key=lambda x: x[1], reverse=True)
+    }
     return {"average_sentiment": average_sentiment, "message": "Sentiment data calculated for the specified date range.", "sentiment_counts": sentiment_counts}
