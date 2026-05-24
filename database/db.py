@@ -3,7 +3,6 @@ import os
 import json
 
 def getDatabase(path: str = "data/scraping_data.json") -> TinyDB:
-
     # Create file if doesn't exist
     if not os.path.exists(path):
         with open(path, "w") as f:
@@ -13,8 +12,11 @@ def getDatabase(path: str = "data/scraping_data.json") -> TinyDB:
     if os.path.getsize(path) == 0:
         with open(path, "w") as f:
             json.dump({}, f)
-
     return TinyDB(path)
+
+def resetDatabase(path: str = "data/scraping_data.json") -> None:
+    with open(path, "w") as f:
+        json.dump({}, f)
 
 def getNewsTable(db: TinyDB) -> TinyDB.table:
     return db.table("news")
