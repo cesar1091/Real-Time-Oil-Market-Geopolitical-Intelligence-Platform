@@ -21,36 +21,35 @@ def main():
         )
     return render_template("index.html", response_text=response_text)
 
-@app.route("/oilanalytics")
-def oil_analytics():
+@app.route("/oilanalytics/<string:ticker>")
+def oil_analytics(ticker):
     db = getDatabase()
     oil_table = getOilTable(db)
     oil_data = oil_table.all()
     # Placeholder for processing the data and generating insights
     insights = {}
-    for ticker in TICKERS:
-        ticker_data = [entry for entry in oil_data if entry['ticker'] == ticker]
-        # Process ticker_data to calculate insights (e.g., average price, trends)
-        if ticker_data:
-            average_price = sum(entry['close'] for entry in ticker_data) / len(ticker_data)
-            max_price = max(entry['high'] for entry in ticker_data)
-            min_price = min(entry['low'] for entry in ticker_data)
-            std_price = (sum((entry['close'] - average_price) ** 2 for entry in ticker_data) / len(ticker_data)) ** 0.5
-            insights[ticker] = {
-                'average_price': average_price,
-                'max_price': max_price,
-                'min_price': min_price,
-                'std_price': std_price,
-                'data_points': len(ticker_data)
-            }
-        else:
-            insights[ticker] = {
-                'average_price': None,
-                'max_price': None,
-                'min_price': None,
-                'std_price': None,
-                'data_points': 0
-            }
+    ticker_data = [entry for entry in oil_data if entry['ticker'] == ticker]
+    # Process ticker_data to calculate insights (e.g., average price, trends)
+    if ticker_data:
+        average_price = sum(entry['close'] for entry in ticker_data) / len(ticker_data)
+        max_price = max(entry['high'] for entry in ticker_data)
+        min_price = min(entry['low'] for entry in ticker_data)
+        std_price = (sum((entry['close'] - average_price) ** 2 for entry in ticker_data) / len(ticker_data)) ** 0.5
+        insights[ticker] = {
+            'average_price': average_price,
+            'max_price': max_price,
+            'min_price': min_price,
+            'std_price': std_price,
+            'data_points': len(ticker_data)
+        }
+    else:
+        insights[ticker] = {
+            'average_price': None,
+            'max_price': None,
+            'min_price': None,
+            'std_price': None,
+            'data_points': 0
+        }
     return insights
 
 @app.route("/topNnewskeywords/<int:n>")
@@ -70,7 +69,7 @@ def news_analytics(n):
     top_keywords = sorted(keyword_counts.items(), key=lambda x: x[1], reverse=True)[:n]
     return {"top_keywords": top_keywords}
 
-@app.route("averageSentimentreport/<start_date>/<end_date>")
+@app.route("/averageSentimentreport/<start_date>/<end_date>")
 def sentiment_report(start_date, end_date):
     # Implementation for fetching and calculating average sentiment within a date range
     db = getDatabase()
