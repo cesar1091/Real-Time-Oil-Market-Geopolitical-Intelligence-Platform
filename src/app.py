@@ -2,7 +2,6 @@
 from flask import Flask, request, render_template
 from database.db import getDatabase, getNewsTable, getOilTable, getSentimentTable
 import spacy
-from transformers import pipeline
 
 TICKERS = ['CL=F', 'BZ=F', 'NG=F']
 app = Flask(__name__, static_folder="static", template_folder="templates")
