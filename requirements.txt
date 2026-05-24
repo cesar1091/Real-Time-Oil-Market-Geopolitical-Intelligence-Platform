@@ -10,3 +10,4 @@ lxml==5.3.0
 textblob==0.18.0.post0
 pytest==8.3.3
 pytest-mock==3.15.1
+spacy==3.8.14
