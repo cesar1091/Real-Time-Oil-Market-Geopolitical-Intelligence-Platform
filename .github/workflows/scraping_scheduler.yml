@@ -48,7 +48,11 @@ jobs:
       
       - name: Run top keywords analysis
         run: |
-          python -m analytics.top-k-analysis
+          python -m analytics.top_k_analysis
+
+      - name: Run oil prices analysis
+        run: |
+          python -m analytics.oil_prices_analysis
 
       - name: Commit updated data
         run: |
