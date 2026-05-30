@@ -205,6 +205,8 @@ def api_sentiment_counts_by_day():
     db = getDatabase()
     sentiment_table = getSentimentTable(db)
     entries = sentiment_table.all()
+    # order entries by published_date ascending, treating missing or invalid dates as 'unknown' which will be sorted at the end
+    entries.sort(key=lambda x: x.get('published_date', 'unknown'))
     start = request.args.get('start_date')
     end = request.args.get('end_date')
 
