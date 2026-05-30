@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Analytics Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-content">
+          <span class="eyebrow">Analytics Dashboard</span>
+          <h1>Real-Time Intelligence Insights</h1>
+          <p class="hero-copy">
+            Browse top keywords, sentiment trends, average oil price by day and ticker, and correlation analysis in one dashboard.
+          </p>
+          <p><a href="/">Back to Home</a></p>
+        </div>
+      </header>
+
+      <main class="features">
+        <article>
+          <h2>Top Keywords (by day)</h2>
+          <div class="chart-controls">
+            <label for="startDate">Start date:</label>
+            <input type="date" id="startDate" />
+            <label for="endDate">End date:</label>
+            <input type="date" id="endDate" />
+            <button id="applyRange">Apply range</button>
+          </div>
+          <div class="chart-controls">
+            <label for="dateSelect">Select day:</label>
+            <select id="dateSelect"></select>
+          </div>
+          <div class="chart-container">
+            <canvas id="topKeywordsChart"></canvas>
+          </div>
+        </article>
+
+        <article>
+          <h2>Average Sentiment Over Time</h2>
+          <div class="chart-container">
+            <canvas id="sentimentChart"></canvas>
+          </div>
+        </article>
+
+        <article>
+          <h2>Average Oil Price</h2>
+          <div id="averagePriceSummary">Cargando...</div>
+        </article>
+
+        <article>
+          <h2>Average Oil Price By Day (Ticker Trends)</h2>
+          <div class="chart-container">
+            <canvas id="averagePriceByDayChart"></canvas>
+          </div>
+        </article>
+
+        <article>
+          <h2>Average Oil Price By Ticker</h2>
+          <div class="chart-container">
+            <canvas id="averagePriceByTickerChart"></canvas>
+          </div>
+        </article>
+
+        <article>
+          <h2>Sentiment Count By Day</h2>
+          <div class="chart-container">
+            <canvas id="sentimentCountChart"></canvas>
+          </div>
+        </article>
+
+        <article>
+          <h2>Correlation Report</h2>
+          <pre id="correlationReport">Cargando...</pre>
+        </article>
+      </main>
+    </div>
+
+    <script src="/static/dashboard.js"></script>
+  </body>
+</html>

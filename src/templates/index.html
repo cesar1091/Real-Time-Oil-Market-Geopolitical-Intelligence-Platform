@@ -20,6 +20,7 @@
                     <input id="user_input" name="user_input" type="text" placeholder="E.g. impact of OPEC output cuts on Brent prices" value="{{ request.form.get('user_input', '') }}" />
                     <button type="submit">Submit</button>
                 </form>
+                <p style="margin-top:12px;"><a href="/dashboard">Open Analytics Dashboard</a></p>
                 {% if response_text %}
                 <section class="result-card">
                     <h2>Analysis Result</h2>
@@ -34,20 +35,6 @@
                 <h2>Why this matters</h2>
                 <p>
                     A smart webpage should help you capture market context quickly, present results clearly, and stay readable on desktop or mobile.
-                </p>
-            </article>
-            <article>
-                <h2>Improved layout</h2>
-                <ul>
-                    <li>Large hero section with a clear value proposition</li>
-                    <li>Accessible form labels and button styling</li>
-                    <li>Feedback card that highlights user submissions</li>
-                </ul>
-            </article>
-            <article>
-                <h2>Ready for next steps</h2>
-                <p>
-                    When you want, I can also add chart tiles, news feeds, or a live oil-price widget to make the page interactive.
                 </p>
             </article>
         </main>

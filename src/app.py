@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
 from flask import Flask, request, render_template
 from database.db import *
+from datetime import datetime
 
 TICKERS = ['CL=F', 'BZ=F', 'NG=F']
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
 @app.route("/", methods=["GET", "POST"])
 def main():
-    response_text = None
+    # Project description shown by default on GET
+    project_description = (
+        "Real-Time Oil Market Geopolitical Intelligence Platform: collects news and oil-price data, "
+        "runs sentiment and correlation analysis, and exposes dashboards and APIs for exploration. "
+        "Use the Analytics Dashboard link below to view top keywords, sentiment trends and correlation reports."
+    )
+
+    response_text = project_description
     if request.method == "POST":
         input_text = request.form.get("user_input", "").strip()
         response_text = (
@@ -15,7 +23,9 @@ def main():
             if input_text
             else "Please enter a query to get intelligence feedback."
         )
+
     return render_template("index.html", response_text=response_text)
+
 
 @app.route("/oilanalytics/<string:ticker>")
 def oil_analytics(ticker):
@@ -95,3 +105,244 @@ def correlation_report():
         return {"correlation_report": correlation_data[0]}  # Assuming there's only one report entry
     else:
         return {"correlation_report": None, "message": "No correlation data available."}
+
+
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
+
+
+@app.route("/api/top_keywords_by_day")
+def api_top_keywords_by_day():
+    db = getDatabase()
+    top_k_table = getTopKTable(db)
+    entries = top_k_table.all()
+
+    start = request.args.get('start_date')
+    end = request.args.get('end_date')
+
+    def in_range(d):
+        if d == 'unknown':
+            return False
+        try:
+            dd = datetime.strptime(d, "%d-%m-%Y")
+        except Exception:
+            return False
+        if start:
+            try:
+                s = datetime.strptime(start, "%d-%m-%Y")
+                if dd < s:
+                    return False
+            except Exception:
+                pass
+        if end:
+            try:
+                e = datetime.strptime(end, "%d-%m-%Y")
+                if dd > e:
+                    return False
+            except Exception:
+                pass
+        return True
+
+    result = {}
+    for e in entries:
+        date = e.get('date', 'unknown')
+        if start or end:
+            if not in_range(date):
+                continue
+        result[date] = e.get('top_keywords', [])
+    return {"top_keywords_by_day": result}
+
+
+@app.route("/api/sentiment_by_day")
+def api_sentiment_by_day():
+    db = getDatabase()
+    sentiment_table = getSentimentTable(db)
+    entries = sentiment_table.all()
+    start = request.args.get('start_date')
+    end = request.args.get('end_date')
+
+    def in_range(d):
+        if d == 'unknown':
+            return False
+        try:
+            dd = datetime.strptime(d, "%d-%m-%Y")
+        except Exception:
+            return False
+        if start:
+            try:
+                s = datetime.strptime(start, "%d-%m-%Y")
+                if dd < s:
+                    return False
+            except Exception:
+                pass
+        if end:
+            try:
+                e = datetime.strptime(end, "%d-%m-%Y")
+                if dd > e:
+                    return False
+            except Exception:
+                pass
+        return True
+
+    sums = {}
+    counts = {}
+    for e in entries:
+        d = e.get('published_date', 'unknown')
+        if start or end:
+            if not in_range(d):
+                continue
+        s = e.get('score', 0)
+        sums[d] = sums.get(d, 0) + s
+        counts[d] = counts.get(d, 0) + 1
+    avg = {d: (sums[d] / counts[d]) for d in sums}
+    return {"sentiment_by_day": avg}
+
+
+@app.route("/api/sentiment_counts_by_day")
+def api_sentiment_counts_by_day():
+    db = getDatabase()
+    sentiment_table = getSentimentTable(db)
+    entries = sentiment_table.all()
+    start = request.args.get('start_date')
+    end = request.args.get('end_date')
+
+    def in_range(d):
+        if d == 'unknown':
+            return False
+        try:
+            dd = datetime.strptime(d, "%d-%m-%Y")
+        except Exception:
+            return False
+        if start:
+            try:
+                s = datetime.strptime(start, "%d-%m-%Y")
+                if dd < s:
+                    return False
+            except Exception:
+                pass
+        if end:
+            try:
+                e = datetime.strptime(end, "%d-%m-%Y")
+                if dd > e:
+                    return False
+            except Exception:
+                pass
+        return True
+
+    counts_by_day = {}
+    for e in entries:
+        d = e.get('published_date', 'unknown')
+        if start or end:
+            if not in_range(d):
+                continue
+        label = e.get('sentiment', 'UNKNOWN').upper()
+        if d not in counts_by_day:
+            counts_by_day[d] = {'POSITIVE': 0, 'NEGATIVE': 0, 'NEUTRAL': 0, 'UNKNOWN': 0}
+        if label not in counts_by_day[d]:
+            counts_by_day[d][label] = 0
+        counts_by_day[d][label] += 1
+
+    return {"sentiment_counts_by_day": counts_by_day}
+
+
+@app.route("/api/average_oil_price")
+def api_average_oil_price():
+    db = getDatabase()
+    oil_table = getOilTable(db)
+    entries = oil_table.all()
+    start = request.args.get('start_date')
+    end = request.args.get('end_date')
+
+    start_date = None
+    end_date = None
+    if start:
+        try:
+            start_date = datetime.strptime(start, "%d-%m-%Y").date()
+        except Exception:
+            start_date = None
+    if end:
+        try:
+            end_date = datetime.strptime(end, "%d-%m-%Y").date()
+        except Exception:
+            end_date = None
+
+    daily_sums = {}
+    daily_counts = {}
+    daily_ticker_sums = {}
+    daily_ticker_counts = {}
+    ticker_sums = {}
+    ticker_counts = {}
+    total_sum = 0
+    total_count = 0
+
+    for entry in entries:
+        datetime_text = entry.get('datetime')
+        if not datetime_text:
+            continue
+        try:
+            record_date = datetime.fromisoformat(datetime_text).date()
+        except Exception:
+            continue
+        if start_date and record_date < start_date:
+            continue
+        if end_date and record_date > end_date:
+            continue
+
+        price = entry.get('close')
+        ticker = entry.get('ticker', 'unknown')
+        if price is None:
+            continue
+
+        day = record_date.strftime("%d-%m-%Y")
+        daily_sums[day] = daily_sums.get(day, 0) + price
+        daily_counts[day] = daily_counts.get(day, 0) + 1
+
+        if day not in daily_ticker_sums:
+            daily_ticker_sums[day] = {}
+            daily_ticker_counts[day] = {}
+        daily_ticker_sums[day][ticker] = daily_ticker_sums[day].get(ticker, 0) + price
+        daily_ticker_counts[day][ticker] = daily_ticker_counts[day].get(ticker, 0) + 1
+
+        ticker_sums[ticker] = ticker_sums.get(ticker, 0) + price
+        ticker_counts[ticker] = ticker_counts.get(ticker, 0) + 1
+
+        total_sum += price
+        total_count += 1
+
+    daily_average = {
+        day: (daily_sums[day] / daily_counts[day])
+        for day in daily_sums
+        if daily_counts[day]
+    }
+    daily_ticker_average = {
+        day: {
+            ticker: (daily_ticker_sums[day][ticker] / daily_ticker_counts[day][ticker])
+            for ticker in daily_ticker_sums[day]
+            if daily_ticker_counts[day].get(ticker)
+        }
+        for day in daily_ticker_sums
+    }
+    average_by_ticker = {
+        ticker: (ticker_sums[ticker] / ticker_counts[ticker])
+        for ticker in ticker_sums
+        if ticker_counts[ticker]
+    }
+    overall = total_sum / total_count if total_count else None
+
+    return {
+        "average_price": {
+            "overall": overall,
+            "by_ticker": average_by_ticker,
+            "daily_average": daily_average,
+            "daily_ticker_average": daily_ticker_average
+        }
+    }
+
+
+@app.route("/api/correlation")
+def api_correlation():
+    db = getDatabase()
+    correlation_table = getCorrelationTable(db)
+    entries = correlation_table.all()
+    return {"correlation": entries}
