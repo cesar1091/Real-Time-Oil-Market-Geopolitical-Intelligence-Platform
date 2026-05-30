@@ -196,8 +196,8 @@ def api_sentiment_by_day():
             s = e.get('score', 0)
             sums[d] = sums.get(d, 0) + s
             counts[d] = counts.get(d, 0) + 1
-        avg = {d: (sums[d] / counts[d]) for d in sums}
-        return {"sentiment_by_day": avg}
+    avg = {d: (sums[d] / counts[d]) for d in sums}
+    return {"sentiment_by_day": avg}
 
 
 @app.route("/api/sentiment_counts_by_day")
