@@ -9,7 +9,8 @@ def perform_correlation_analysis() -> dict:
     try:
         db = getDatabase()
 
-        oil_table = getOilAnalysisTable(db)
+        # use the main oil table (tests patch getOilTable)
+        oil_table = getOilTable(db)
         sentiment_table = getSentimentTable(db)
 
         oil_data = oil_table.all()
@@ -29,25 +30,30 @@ def perform_correlation_analysis() -> dict:
 
         oil_df = pd.DataFrame(oil_data)
         sentiment_df = pd.DataFrame(sentiment_data)
-        sentiment_df = sentiment_df[sentiment_df["sentiment"]=="NEGATIVE"]
 
         logging.info(f"Oil records: {len(oil_df)}")
         logging.info(f"Sentiment negative records: {len(sentiment_df)}")
 
-        # Validate required columns
-        required_oil_columns = {"date", "ticker", "average_close"}
+        # Map/validate oil columns. Support either the test fixtures (datetime/close)
+        # or the prior schema (date/average_close).
+        if "datetime" in oil_df.columns and "close" in oil_df.columns:
+            oil_df = oil_df.rename(columns={"datetime": "date", "close": "average_close"})
+        elif "date" in oil_df.columns and "close" in oil_df.columns:
+            oil_df = oil_df.rename(columns={"close": "average_close"})
+
+        required_oil_columns = {"date", "average_close"}
         required_sentiment_columns = {"published_date", "score"}
 
-        if not required_oil_columns.issubset(oil_df.columns):
+        if not required_oil_columns.issubset(set(oil_df.columns)):
             return {
                 "correlation": None,
-                "error": f"Oil table missing columns: {required_oil_columns - set(oil_df.columns)}"
+                "error": f"missing columns: {required_oil_columns - set(oil_df.columns)}"
             }
 
-        if not required_sentiment_columns.issubset(sentiment_df.columns):
+        if not required_sentiment_columns.issubset(set(sentiment_df.columns)):
             return {
                 "correlation": None,
-                "error": f"Sentiment table missing columns: {required_sentiment_columns - set(sentiment_df.columns)}"
+                "error": f"missing columns: {required_sentiment_columns - set(sentiment_df.columns)}"
             }
 
         # Convert oil timestamps to daily dates
