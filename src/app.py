@@ -256,6 +256,8 @@ def api_average_oil_price():
     db = getDatabase()
     analysis_table = getOilAnalysisTable(db)
     entries = analysis_table.all()
+    # order entries by date ascending, treating missing or invalid dates as 'unknown' which will be sorted at the end
+    entries.sort(key=lambda x: x.get('date', 'unknown'))
     start = request.args.get('start_date')
     end = request.args.get('end_date')
 
