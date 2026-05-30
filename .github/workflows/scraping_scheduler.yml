@@ -54,6 +54,10 @@ jobs:
         run: |
           python -m analytics.oil_prices_analysis
 
+      - name: Run correlation analysis
+        run: |
+          python -m analytics.correlation_analysis
+
       - name: Commit updated data
         run: |
           git config --global user.name "github-actions"

@@ -45,6 +45,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `${d}-${m}-${y}`;
   }
 
+  function parseDDMMYYYY(dateString) {
+    const parts = dateString?.split('-');
+    if (!parts || parts.length !== 3) return NaN;
+    const [day, month, year] = parts;
+    return new Date(`${year}-${month}-${day}`).getTime();
+  }
+
+  function sortDDMMYYYYDates(dates) {
+    return dates.slice().sort((a, b) => parseDDMMYYYY(a) - parseDDMMYYYY(b));
+  }
+
   async function fetchAndRenderTop(startISO, endISO) {
     const params = [];
     if (startISO) params.push(`start_date=${isoToDDMMYYYY(startISO)}`);
@@ -56,7 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // populate select
     dateSelect.innerHTML = '';
-    const dates = Object.keys(byDay).sort();
+    const dates = sortDDMMYYYYDates(Object.keys(byDay));
     dates.forEach(d => {
       const opt = document.createElement('option');
       opt.value = d;
@@ -93,7 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const resp = await fetch(url);
     const data = await resp.json();
     const sentByDay = data.sentiment_by_day || {};
-    const sDates = Object.keys(sentByDay).sort();
+    const sDates = sortDDMMYYYYDates(Object.keys(sentByDay));
     const sValues = sDates.map(d => sentByDay[d]);
 
     sentimentChart.data.labels = sDates;
@@ -150,11 +161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     averagePriceSummary.innerHTML = html;
 
     const dailyTickerAverage = avg.daily_ticker_average || {};
-    const dayLabels = Object.keys(dailyTickerAverage).sort((a, b) => {
-      const [da, ma, ya] = a.split('-');
-      const [db, mb, yb] = b.split('-');
-      return new Date(`${ya}-${ma}-${da}`) - new Date(`${yb}-${mb}-${db}`);
-    });
+    const dayLabels = sortDDMMYYYYDates(Object.keys(dailyTickerAverage));
 
     const tickerColors = {
       'CL=F': 'rgb(54, 162, 235)',
@@ -189,11 +196,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const resp = await fetch(url);
     const data = await resp.json();
     const countsByDay = data.sentiment_counts_by_day || {};
-    const dayLabels = Object.keys(countsByDay).sort((a, b) => {
-      const [da, ma, ya] = a.split('-');
-      const [db, mb, yb] = b.split('-');
-      return new Date(`${ya}-${ma}-${da}`) - new Date(`${yb}-${mb}-${db}`);
-    });
+    const dayLabels = sortDDMMYYYYDates(Object.keys(countsByDay));
 
     const positiveData = dayLabels.map(d => countsByDay[d]?.POSITIVE || 0);
     const negativeData = dayLabels.map(d => countsByDay[d]?.NEGATIVE || 0);
