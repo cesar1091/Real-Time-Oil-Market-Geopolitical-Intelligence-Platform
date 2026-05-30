@@ -103,6 +103,45 @@ h1 {
     box-shadow: 0 18px 30px rgba(77, 216, 255, 0.2);
 }
 
+.btn, a.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 28px;
+    border: none;
+    border-radius: 14px;
+    color: #071013;
+    background: linear-gradient(135deg, #4dd8ff, #4b7fff);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.btn:hover, a.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 30px rgba(77, 216, 255, 0.2);
+}
+
+.btn-secondary, a.btn-secondary {
+    background: rgba(77, 216, 255, 0.15);
+    border: 1px solid rgba(77, 216, 255, 0.4);
+    color: #4dd8ff;
+}
+
+.btn-secondary:hover, a.btn-secondary:hover {
+    background: rgba(77, 216, 255, 0.25);
+    box-shadow: 0 12px 20px rgba(77, 216, 255, 0.15);
+}
+
+.btn-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+}
+
 .result-card {
     margin-top: 32px;
     padding: 24px 26px;

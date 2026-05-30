@@ -20,7 +20,9 @@
                     <input id="user_input" name="user_input" type="text" placeholder="E.g. impact of OPEC output cuts on Brent prices" value="{{ request.form.get('user_input', '') }}" />
                     <button type="submit">Submit</button>
                 </form>
-                <p style="margin-top:12px;"><a href="/dashboard">Open Analytics Dashboard</a></p>
+                <div class="btn-group">
+                    <a href="/dashboard" class="btn">Open Analytics Dashboard</a>
+                </div>
                 {% if response_text %}
                 <section class="result-card">
                     <h2>Analysis Result</h2>
