@@ -26,3 +26,10 @@ def getOilTable(db: TinyDB) -> TinyDB.table:
 
 def getSentimentTable(db: TinyDB) -> TinyDB.table:
     return db.table("sentiment")
+
+def getTopKTable(db: TinyDB) -> TinyDB.table:
+    return db.table("top_k_analysis")
+
+def getCorrelationTable(db: TinyDB) -> TinyDB.table:
+    return db.table("correlation_analysis")
+

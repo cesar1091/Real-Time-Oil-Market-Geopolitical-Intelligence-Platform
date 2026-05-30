@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 from flask import Flask, request, render_template
-from database.db import getDatabase, getNewsTable, getOilTable, getSentimentTable
-import spacy
+from database.db import *
 
 TICKERS = ['CL=F', 'BZ=F', 'NG=F']
 app = Flask(__name__, static_folder="static", template_folder="templates")
-NLP = spacy.load("en_core_web_sm")
-
 
 @app.route("/", methods=["GET", "POST"])
 def main():
@@ -51,22 +48,22 @@ def oil_analytics(ticker):
         }
     return insights
 
-@app.route("/topNnewskeywords/<int:n>")
-def news_analytics(n):
+@app.route("/topNnewskeywords/<string:day>/<int:n>")
+def news_analytics(day, n):
     db = getDatabase()
-    news_table = getNewsTable(db)
-    news_data = news_table.all()
+    top_keywords = getTopKTable(db)
+    top_keywords_data = top_keywords.all()
     # Depurate titles to extract keywords and count their occurrences
     # Placeholder for processing the data and generating insights
-    keyword_counts = {}
-    for entry in news_data:
-        title = entry.get('title', '')
-        doc = NLP(title)
-        keywords = [token.text for token in doc if token.pos_ in ['NOUN', 'PROPN'] and not token.is_stop]
-        for keyword in keywords:
-            keyword_counts[keyword] = keyword_counts.get(keyword, 0) + 1
-    top_keywords = sorted(keyword_counts.items(), key=lambda x: x[1], reverse=True)[:n]
-    return {"top_keywords": top_keywords}
+    day_keywords = [entry for entry in top_keywords_data if entry['date'] == day]
+    if day_keywords:
+        entries = day_keywords[0]['top_keywords']
+        top_n_keywords = entries[:n]
+        return {"date": day, "top_n_keywords": top_n_keywords}
+    else:
+        return {"date": day, "top_n_keywords": []}
+    
+        
 
 @app.route("/averageSentimentreport/<start_date>/<end_date>")
 def sentiment_report(start_date, end_date):
@@ -86,3 +83,15 @@ def sentiment_report(start_date, end_date):
         'neutral': sum(1 for entry in filtered_data if entry['sentiment'] == 'NEUTRAL')
     }
     return {"average_sentiment": average_sentiment, "message": "Sentiment data calculated for the specified date range.", "sentiment_counts": sentiment_counts}
+
+@app.route("/correlationreport")
+def correlation_report():
+    # Implementation for calculating correlation between oil prices and news sentiment
+    db = getDatabase()
+    correlation_report = getCorrelationTable(db)
+    correlation_data = correlation_report.all()
+    # Placeholder for processing the data and calculating correlation
+    if correlation_data:
+        return {"correlation_report": correlation_data[0]}  # Assuming there's only one report entry
+    else:
+        return {"correlation_report": None, "message": "No correlation data available."}

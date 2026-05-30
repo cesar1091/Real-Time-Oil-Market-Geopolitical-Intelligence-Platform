@@ -45,6 +45,10 @@ jobs:
       - name: Run sentiment analysis
         run: |
           python -m analytics.sentiment_analysis
+      
+      - name: Run top keywords analysis
+        run: |
+          python -m analytics.top-k-analysis
 
       - name: Commit updated data
         run: |

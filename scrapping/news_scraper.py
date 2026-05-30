@@ -6,22 +6,23 @@ from typing import List, Dict
 from tinydb.table import Table
 
 logging.basicConfig(level=logging.INFO)
-URL = "https://news.google.com/rss/search?q=iran+oil"
+URLs = ["https://news.google.com/rss/search?q=iran+oil", "https://news.google.com/rss/search?q=trump+oil", "https://news.google.com/rss/search?q=ormuz+trump+oil"]
 
 def fetch_news() -> List[Dict[str, str]]:
     try:
-        response = requests.get(URL)
-        # Parse XML
-        soup = BeautifulSoup(response.text, "xml")
-        # Find all news items
-        items = soup.find_all("item")
-        # Save news items
         newsList = []
-        for item in items:
-            title = item.title.text
-            link = item.link.text
-            pub_date = item.pubDate.text
-            newsList.append({
+        for URL in URLs:
+            response = requests.get(URL)
+            # Parse XML
+            soup = BeautifulSoup(response.text, "xml")
+            # Find all news items
+            items = soup.find_all("item")
+            # Save news items
+            for item in items:
+                title = item.title.text
+                link = item.link.text
+                pub_date = item.pubDate.text
+                newsList.append({
                 'title': title,
                 'link': link,
                 'published': pub_date
