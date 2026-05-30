@@ -33,3 +33,5 @@ def getTopKTable(db: TinyDB) -> TinyDB.table:
 def getCorrelationTable(db: TinyDB) -> TinyDB.table:
     return db.table("correlation_analysis")
 
+def getOilAnalysisTable(db: TinyDB) -> TinyDB.table:
+    return db.table("oil_prices_analysis")

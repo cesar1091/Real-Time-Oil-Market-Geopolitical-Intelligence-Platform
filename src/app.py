@@ -249,8 +249,8 @@ def api_sentiment_counts_by_day():
 @app.route("/api/average_oil_price")
 def api_average_oil_price():
     db = getDatabase()
-    oil_table = getOilTable(db)
-    entries = oil_table.all()
+    analysis_table = getOilAnalysisTable(db)
+    entries = analysis_table.all()
     start = request.args.get('start_date')
     end = request.args.get('end_date')
 
@@ -267,21 +267,21 @@ def api_average_oil_price():
         except Exception:
             end_date = None
 
-    daily_sums = {}
-    daily_counts = {}
-    daily_ticker_sums = {}
-    daily_ticker_counts = {}
+    daily_ticker_values = {}
     ticker_sums = {}
     ticker_counts = {}
     total_sum = 0
     total_count = 0
 
     for entry in entries:
-        datetime_text = entry.get('datetime')
-        if not datetime_text:
+        day = entry.get('date')
+        ticker = entry.get('ticker', 'unknown')
+        price = entry.get('average_close')
+        if not day or price is None:
             continue
+
         try:
-            record_date = datetime.fromisoformat(datetime_text).date()
+            record_date = datetime.strptime(day, "%d-%m-%Y").date()
         except Exception:
             continue
         if start_date and record_date < start_date:
@@ -289,39 +289,19 @@ def api_average_oil_price():
         if end_date and record_date > end_date:
             continue
 
-        price = entry.get('close')
-        ticker = entry.get('ticker', 'unknown')
-        if price is None:
-            continue
-
-        day = record_date.strftime("%d-%m-%Y")
-        daily_sums[day] = daily_sums.get(day, 0) + price
-        daily_counts[day] = daily_counts.get(day, 0) + 1
-
-        if day not in daily_ticker_sums:
-            daily_ticker_sums[day] = {}
-            daily_ticker_counts[day] = {}
-        daily_ticker_sums[day][ticker] = daily_ticker_sums[day].get(ticker, 0) + price
-        daily_ticker_counts[day][ticker] = daily_ticker_counts[day].get(ticker, 0) + 1
+        if day not in daily_ticker_values:
+            daily_ticker_values[day] = {}
+        daily_ticker_values[day][ticker] = price
 
         ticker_sums[ticker] = ticker_sums.get(ticker, 0) + price
         ticker_counts[ticker] = ticker_counts.get(ticker, 0) + 1
-
         total_sum += price
         total_count += 1
 
     daily_average = {
-        day: (daily_sums[day] / daily_counts[day])
-        for day in daily_sums
-        if daily_counts[day]
-    }
-    daily_ticker_average = {
-        day: {
-            ticker: (daily_ticker_sums[day][ticker] / daily_ticker_counts[day][ticker])
-            for ticker in daily_ticker_sums[day]
-            if daily_ticker_counts[day].get(ticker)
-        }
-        for day in daily_ticker_sums
+        day: sum(ticker_prices.values()) / len(ticker_prices)
+        for day, ticker_prices in daily_ticker_values.items()
+        if ticker_prices
     }
     average_by_ticker = {
         ticker: (ticker_sums[ticker] / ticker_counts[ticker])
@@ -335,7 +315,7 @@ def api_average_oil_price():
             "overall": overall,
             "by_ticker": average_by_ticker,
             "daily_average": daily_average,
-            "daily_ticker_average": daily_ticker_average
+            "daily_ticker_average": daily_ticker_values
         }
     }
 
