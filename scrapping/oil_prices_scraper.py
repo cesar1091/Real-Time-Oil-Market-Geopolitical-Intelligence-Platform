@@ -11,7 +11,7 @@ TICKERS = ['CL=F', 'BZ=F', 'NG=F']
 
 def fetch_oil_prices()-> List[Dict]:
     try:
-        data = yf.download(TICKERS, period='5d', interval='1h')
+        data = yf.download(TICKERS, period='1mo', interval='1h')
         if data.empty:
             logging.warning("No data fetched for the given tickers.")
             return []
