@@ -29,9 +29,10 @@ def perform_correlation_analysis() -> dict:
 
         oil_df = pd.DataFrame(oil_data)
         sentiment_df = pd.DataFrame(sentiment_data)
+        sentiment_df = sentiment_df[sentiment_df["sentiment"]=="NEGATIVE"]
 
         logging.info(f"Oil records: {len(oil_df)}")
-        logging.info(f"Sentiment records: {len(sentiment_df)}")
+        logging.info(f"Sentiment negative records: {len(sentiment_df)}")
 
         # Validate required columns
         required_oil_columns = {"datetime", "close"}

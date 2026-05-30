@@ -188,15 +188,16 @@ def api_sentiment_by_day():
     sums = {}
     counts = {}
     for e in entries:
-        d = e.get('published_date', 'unknown')
-        if start or end:
-            if not in_range(d):
-                continue
-        s = e.get('score', 0)
-        sums[d] = sums.get(d, 0) + s
-        counts[d] = counts.get(d, 0) + 1
-    avg = {d: (sums[d] / counts[d]) for d in sums}
-    return {"sentiment_by_day": avg}
+        if e.get('sentiment')=='NEGATIVE':
+            d = e.get('published_date', 'unknown')
+            if start or end:
+                if not in_range(d):
+                    continue
+            s = e.get('score', 0)
+            sums[d] = sums.get(d, 0) + s
+            counts[d] = counts.get(d, 0) + 1
+        avg = {d: (sums[d] / counts[d]) for d in sums}
+        return {"sentiment_by_day": avg}
 
 
 @app.route("/api/sentiment_counts_by_day")
