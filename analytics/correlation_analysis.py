@@ -9,7 +9,7 @@ def perform_correlation_analysis() -> dict:
     try:
         db = getDatabase()
 
-        oil_table = getOilTable(db)
+        oil_table = getOilAnalysisTable(db)
         sentiment_table = getSentimentTable(db)
 
         oil_data = oil_table.all()
@@ -35,7 +35,7 @@ def perform_correlation_analysis() -> dict:
         logging.info(f"Sentiment negative records: {len(sentiment_df)}")
 
         # Validate required columns
-        required_oil_columns = {"datetime", "close"}
+        required_oil_columns = {"date", "ticker", "average_close"}
         required_sentiment_columns = {"published_date", "score"}
 
         if not required_oil_columns.issubset(oil_df.columns):
@@ -53,11 +53,10 @@ def perform_correlation_analysis() -> dict:
         # Convert oil timestamps to daily dates
         oil_df["date_key"] = (
             pd.to_datetime(
-                oil_df["datetime"],
+                oil_df["date"],
                 utc=True,
                 errors="coerce"
             )
-            .dt.tz_localize(None)
             .dt.date
         )
 
@@ -72,15 +71,8 @@ def perform_correlation_analysis() -> dict:
         )
 
         # Remove invalid dates
-        oil_df = oil_df.dropna(subset=["date_key", "close"])
+        oil_df = oil_df.dropna(subset=["date_key", "average_close"])
         sentiment_df = sentiment_df.dropna(subset=["date_key", "score"])
-
-        # Aggregate oil prices by day
-        daily_oil = (
-            oil_df
-            .groupby("date_key", as_index=False)["close"]
-            .mean()
-        )
 
         # Aggregate sentiment by day
         daily_sentiment = (
@@ -91,7 +83,7 @@ def perform_correlation_analysis() -> dict:
 
         # Merge on date
         merged_df = pd.merge(
-            daily_oil,
+            oil_df,
             daily_sentiment,
             on="date_key",
             how="inner"
@@ -106,14 +98,14 @@ def perform_correlation_analysis() -> dict:
                 "overlapping_dates": len(merged_df)
             }
 
-        correlation = merged_df["close"].corr(
+        correlation = merged_df["average_close"].corr(
             merged_df["score"]
         )
 
         return {
             "correlation": round(float(correlation), 4),
             "records_used": len(merged_df),
-            "oil_days": len(daily_oil),
+            "oil_days": len(oil_df),
             "sentiment_days": len(daily_sentiment),
             "date_range": {
                 "start": str(merged_df["date_key"].min()),
